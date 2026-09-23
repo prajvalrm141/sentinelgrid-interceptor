@@ -1,0 +1,6 @@
+grpcio==1.62.1
+grpcio-tools==1.62.1
+torch==2.2.1
+torch-geometric==2.5.0
+h3==4.1.0
+numpy==1.26.4

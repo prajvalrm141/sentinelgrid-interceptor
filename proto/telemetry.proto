@@ -1,0 +1,42 @@
+// proto/telemetry.proto
+syntax = "proto3";
+
+package telemetry;
+
+// The gRPC service definition connecting Rust to Python
+service GnnInferenceService {
+  // Receives a single anonymized transaction and returns a risk assessment
+  rpc EvaluateRisk (TransactionPayload) returns (RiskAssessment);
+}
+
+// The incoming data structure (Sent by Rust Ingress)
+message TransactionPayload {
+  string transaction_id = 1;
+
+  // PII must be hashed (SHA-256) before leaving Rust
+  string hashed_source_account = 2;
+  string hashed_target_account = 3;
+
+  double amount    = 4;
+  int64  timestamp = 5;
+
+  // Physical ping coordinates
+  double latitude  = 6;
+  double longitude = 7;
+
+  // Target node type: "ATM", "MICRO_ATM", or "AEPS"
+  string off_ramp_type = 8;
+
+  // Structural graph metrics for the GNN
+  int32  hop_count      = 9;
+  double velocity_score = 10;
+}
+
+// The output data structure (Returned by Python PyTorch)
+message RiskAssessment {
+  string transaction_id      = 1;
+  float  risk_score          = 2; // 0.0 to 1.0 probability of cash-out
+  string h3_index            = 3; // Uber H3 discrete global grid cell ID
+  bool   requires_debit_hold = 4; // Triggers RBI automated hold if score > 0.95
+  string target_jurisdiction = 5; // Police district mapping
+}
