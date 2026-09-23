@@ -165,17 +165,23 @@ export default function App() {
 
   const layers = [
     new ColumnLayer({
-      id: 'tactical-3d-hexagons',
+      id: 'professional-3d-hexagons',
       data: alerts,
       diskResolution: 6,
-      radius: 200, // Shrunk to a tight 200-meter tactical zone
+      radius: 60, // Tight, slender tactical pillar
       extruded: true,
       pickable: true,
-      elevationScale: 12, // Lowered the height to prevent screen-blocking
+      elevationScale: 80, // Tall and imposing
       getPosition: d => d.coordinates,
-      // The 4th number (130) makes it 50% transparent so you can see the map underneath
-      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 130] : [255, 165, 0, 130],
+      // Solid opacity (255) for sharp 3D edge shading. Deep Red for critical, Amber for high.
+      getFillColor: d => d.risk_score > 0.80 ? [220, 38, 38, 255] : [245, 158, 11, 255],
       getElevation: d => (d.risk_score * 100),
+      material: {
+        ambient: 0.5,
+        diffuse: 0.8,
+        shininess: 32,
+        specularColor: [60, 64, 70]
+      },
       updateTriggers: {
         getPosition: [alerts],
         getElevation: [alerts],
