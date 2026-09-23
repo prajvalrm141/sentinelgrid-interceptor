@@ -168,12 +168,12 @@ export default function App() {
       id: 'massive-3d-hexagons',
       data: alerts,
       diskResolution: 6,
-      radius: 2000,
+      radius: 400, // Reduced from 2000 back down to 400 meters
       extruded: true,
       pickable: true,
-      elevationScale: 100,
+      elevationScale: 25, // Reduced from 100 back down to 25
       getPosition: d => d.coordinates,
-      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 255] : [255, 165, 0, 255],
+      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 200] : [255, 165, 0, 200],
       getElevation: d => (d.risk_score * 100),
       updateTriggers: {
         getPosition: [alerts],
