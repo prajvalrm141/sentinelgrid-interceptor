@@ -1,9 +1,10 @@
-import { H3HexagonLayer } from '@deck.gl/geo-layers';
+
 import { ScatterplotLayer } from '@deck.gl/layers';
 import React, { useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
 import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { ScatterplotLayer, ColumnLayer } from '@deck.gl/layers';
 
 const STADIA_API_KEY = "b7b66166-56ab-4599-9ad0-13a9bae45df8";
 const INITIAL_VIEW_STATE = {
@@ -231,22 +232,21 @@ export default function App() {
   }, []);
 
   const layers = [
-    new H3HexagonLayer({
-      id: 'h3-hexagon-layer',
+    new ColumnLayer({
+      id: '3d-hexagon-columns',
       data: alerts,
-      pickable: true,
-      wireframe: true,
-      filled: true,
+      diskResolution: 6, // 6 sides makes it a perfect hexagon
+      radius: 400, // 400 meters wide
       extruded: true,
-      elevationScale: 25,
-      coverage: 0.9,
-      getHexagon: (d) => d.h3_index,
-      getFillColor: (d) => d.risk_score > 0.80 ? [255, 0, 0, 255] : [255, 165, 0, 255],
-      getElevation: (d) => d.risk_score * 100,
+      pickable: true,
+      elevationScale: 20,
+      getPosition: d => d.coordinates,
+      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 220] : [255, 165, 0, 220],
+      getElevation: d => (d.risk_score * 100),
       updateTriggers: {
-        getHexagon: [alerts],
-        getFillColor: [alerts],
-        getElevation: [alerts]
+        getPosition: [alerts],
+        getElevation: [alerts],
+        getFillColor: [alerts]
       }
     }),
     new ScatterplotLayer({
