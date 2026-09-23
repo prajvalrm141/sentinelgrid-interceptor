@@ -233,40 +233,23 @@ export default function App() {
 
   const layers = [
     new ColumnLayer({
-      id: '3d-hexagon-columns',
+      id: 'massive-3d-hexagons',
       data: alerts,
-      diskResolution: 6, // 6 sides makes it a perfect hexagon
-      radius: 400, // 400 meters wide
+      diskResolution: 6,
+      radius: 2000, // Increased from 400m to 2000m (2km wide)
       extruded: true,
       pickable: true,
-      elevationScale: 20,
+      elevationScale: 100, // Made 5x taller
       getPosition: d => d.coordinates,
-      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 220] : [255, 165, 0, 220],
+      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 255] : [255, 165, 0, 255], // 255 opacity
       getElevation: d => (d.risk_score * 100),
       updateTriggers: {
         getPosition: [alerts],
         getElevation: [alerts],
         getFillColor: [alerts]
       }
-    }),
-    new ScatterplotLayer({
-      id: 'safety-net-scatter',
-      data: alerts,
-      pickable: true,
-      opacity: 0.8,
-      stroked: true,
-      filled: true,
-      radiusScale: 6,
-      radiusMinPixels: 10,
-      radiusMaxPixels: 100,
-      lineWidthMinPixels: 2,
-      getPosition: d => d.coordinates,
-      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 200] : [255, 165, 0, 200],
-      getLineColor: [255, 255, 255],
-      updateTriggers: {
-        getPosition: [alerts]
-      }
     })
+    // NOTE: Scatterplot safety net is temporarily removed to guarantee it isn't masking the 3D shapes.
   ];
 
   return (
