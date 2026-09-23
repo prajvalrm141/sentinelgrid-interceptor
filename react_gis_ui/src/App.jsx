@@ -1,6 +1,7 @@
+import { H3HexagonLayer } from '@deck.gl/geo-layers';
+import { ScatterplotLayer } from '@deck.gl/layers';
 import React, { useState, useEffect } from 'react';
 import DeckGL from '@deck.gl/react';
-import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -112,17 +113,24 @@ function ReportFraud({ onComplaintSubmitted }) {
       console.warn("Backend API unreachable. Falling back to client-side GNN interdiction engine.");
 
       setTimeout(() => {
-        // Map realistic H3 Hexagons to the selected dropdown locations
-        let mockH3 = '8860b52623fffff'; // Default Mysuru Saraswathipuram
-        if (formData.incident_location === 'Mysuru_Kuvempunagar') mockH3 = '8860b52467fffff';
-        if (formData.incident_location === 'Bengaluru_MG_Road') mockH3 = '8860145b43fffff';
+        let mockH3 = '8860b52623fffff';
+        let mockCoords = [76.6394, 12.2958]; // Saraswathipuram default
+
+        if (formData.incident_location === 'Mysuru_Kuvempunagar') {
+          mockH3 = '8860b52467fffff';
+          mockCoords = [76.6280, 12.2850];
+        } else if (formData.incident_location === 'Bengaluru_MG_Road') {
+          mockH3 = '8860145b43fffff';
+          mockCoords = [77.5946, 12.9716];
+        }
 
         const mockGNNResult = {
           transaction_id: payload.transaction_id,
           risk_score: 0.94,
           automated_hold: true,
           target_jurisdiction: formData.incident_location.replace('_', ' - '),
-          h3_index: mockH3
+          h3_index: mockH3,
+          coordinates: mockCoords
         };
 
         setStatusMessage({
@@ -134,7 +142,7 @@ function ReportFraud({ onComplaintSubmitted }) {
 
         setFormData(prev => ({ ...prev, utr_number: '', victim_account: '', beneficiary_account: '', amount: '' }));
         setLoading(false);
-      }, 600); // 600ms latency to simulate PyTorch Tensor Math
+      }, 600);
     }
   };
 
@@ -230,11 +238,34 @@ export default function App() {
       wireframe: true,
       filled: true,
       extruded: true,
-      elevationScale: 15,
+      elevationScale: 25,
       coverage: 0.9,
       getHexagon: (d) => d.h3_index,
-      getFillColor: (d) => d.risk_score > 0.80 ? [255, 0, 0, 200] : [255, 165, 0, 200],
+      getFillColor: (d) => d.risk_score > 0.80 ? [255, 0, 0, 255] : [255, 165, 0, 255],
       getElevation: (d) => d.risk_score * 100,
+      updateTriggers: {
+        getHexagon: [alerts],
+        getFillColor: [alerts],
+        getElevation: [alerts]
+      }
+    }),
+    new ScatterplotLayer({
+      id: 'safety-net-scatter',
+      data: alerts,
+      pickable: true,
+      opacity: 0.8,
+      stroked: true,
+      filled: true,
+      radiusScale: 6,
+      radiusMinPixels: 10,
+      radiusMaxPixels: 100,
+      lineWidthMinPixels: 2,
+      getPosition: d => d.coordinates,
+      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 200] : [255, 165, 0, 200],
+      getLineColor: [255, 255, 255],
+      updateTriggers: {
+        getPosition: [alerts]
+      }
     })
   ];
 
