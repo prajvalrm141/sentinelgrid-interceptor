@@ -165,15 +165,16 @@ export default function App() {
 
   const layers = [
     new ColumnLayer({
-      id: 'massive-3d-hexagons',
+      id: 'tactical-3d-hexagons',
       data: alerts,
       diskResolution: 6,
-      radius: 400, // Reduced from 2000 back down to 400 meters
+      radius: 200, // Shrunk to a tight 200-meter tactical zone
       extruded: true,
       pickable: true,
-      elevationScale: 25, // Reduced from 100 back down to 25
+      elevationScale: 12, // Lowered the height to prevent screen-blocking
       getPosition: d => d.coordinates,
-      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 200] : [255, 165, 0, 200],
+      // The 4th number (130) makes it 50% transparent so you can see the map underneath
+      getFillColor: d => d.risk_score > 0.80 ? [255, 0, 0, 130] : [255, 165, 0, 130],
       getElevation: d => (d.risk_score * 100),
       updateTriggers: {
         getPosition: [alerts],
